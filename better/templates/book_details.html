@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h1>{{ book.title }}</h1>
+    <p><strong>Author:</strong> {{ book.author }}</p>
+    <p><strong>Description:</strong> {{ book.description }}</p>
+    <p><strong>Year:</strong> {{ book.year }}</p>
+
+    {% if session.get('user_id') %}
+    <form action="{{ url_for('borrow_book', book_id=book.id) }}" method="POST">
+        <button type="submit">Borrow this book</button>
+    </form>
+    {% else %}
+    <p><a href="{{ url_for('login') }}">Log in</a> to borrow this book.</p>
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Favourite Books</title>
+</head>
+<body>
+    <h1>Your Favourite Books</h1>
+
+    {% if fav_books %}
+        <ul>
+            {% for book in fav_books %}
+                <li>{{ book.title }}</li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You have no favorite books... yet~ 🐾</p>
+    {% endif %}
+
+</body>
+</html>
