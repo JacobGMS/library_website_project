@@ -6,6 +6,11 @@
     <title>Books</title>
 </head>
 <body>
+    <form action="{{ url_for('search') }}" method="GET">
+        <input type="text" name="query" placeholder="Search by title or author..." required>
+        <button type="submit">Search</button>
+    </form>
+
     <h1>All Books</h1>
     <ul>
         {% for book in books %}

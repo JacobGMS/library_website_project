@@ -65,10 +65,11 @@ def register():
         username = request.form.get('username')
         email = request.form.get('email')
         password = request.form.get('password')
-        password_hash.update(password.encode())
-        hash_password = password_hash.hexdigest()
+
+        password_hash = hashlib.sha256(password.encode()).hexdigest()
+
         query = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
-        value = (username, email, hash_password)
+        value = (username, email, password_hash)
         try:
             cursor.execute(query, value)
             db.commit()
@@ -200,23 +201,163 @@ def return_book(book_id):
 
 @app.route('/search')
 def search():
-    pass
+    query = request.args.get('query')
+
+    if not query:
+        return redirect(url_for('books'))
+
+    like_pattern = f"%{query}%"
+    sql = """
+        SELECT * FROM books
+        WHERE title LIKE %s OR author LIKE %s
+    """
+    cursor.execute(sql, (like_pattern, like_pattern))
+    results = cursor.fetchall()
+
+    return render_template("search_results.html", books=results, search_term=query)
+
+@app.route('/login/admin', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        admin_password = request.form.get('password')
+        admin_email = request.form.get('email')
+
+        query = "SELECT * FROM users WHERE email = %s AND is_admin = TRUE"
+        cursor.execute(query, (admin_email,))
+        admin_user = cursor.fetchone()
+
+
+        if admin_user:
+            hashed_input = hashlib.sha256(admin_password.encode()).hexdigest()
+            if hashed_input == admin_user['password']:
+                session['admin_id'] = admin_user['id']
+                session['admin_email'] = admin_user['email']
+                logging.info(f"Admin {admin_user['email']} logged in successfully")
+                return redirect(url_for('admin_dashboard'))
+            else:
+                logging.warning(f"Wrong admin password for {admin_email}")
+                error_message = "Incorrect password"
+        else:
+            logging.warning(f"Admin login failed: {admin_email} not found or not an admin")
+            error_message = "NO admin account with that email"
+
+    return render_template("admin_login.html", error_message=error_message)
 
 @app.route('/admin')
 def admin_dashboard():
-    pass
+    if 'admin_id' not in session:
+        logging.warning("Unauthorized access to /admin")
+        return redirect(url_for('admin_login'))
+        
+    cursor.execute("SELECT COUNT(*) AS total_users FROM users")
+    total_users = cursor.fetchone()['total_users']
+
+    cursor.execute("SELECT COUNT(*) AS total_books FROM books")
+    total_books = cursor.fetchone()['total_books']
+
+    cursor.execute("SELECT COUNT(*) AS borrowed_books FROM borrowed_books WHERE returned_at IS NULL")
+    borrowed_books = cursor.fetchone()['borrowed_books']
+
+    cursor.execute("""
+        SELECT COUNT(*) AS online_users 
+        FROM users 
+        WHERE last_seen >= NOW() - INTERVAL 5 MINUTE
+    """)
+    online_users = cursor.fetchone()['online_users']
+
+    return render_template("admin_dashboard.html",
+                           total_users=total_users,
+                           total_books=total_books,
+                           borrowed_books=borrowed_books,
+                           online_users=online_users)
 
 @app.route('/admin/books/add', methods=['GET', 'POST'])
 def add_book():
-    pass
+    if 'admin_id' not in session:
+        logging.warning("Unauthorized admin book add attempt")
+        return redirect(url_for('admin_login'))
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        author = request.form.get('author')
+        description = request.form.get('description')
+        published_year = request.form.get('published_year')
+        genre = request.form.get('genre')
+
+        query = """
+            INSERT INTO books (title, author, description, published_year, genre, is_available)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+
+        values = (title, author, description, published_year, genre, True)
+
+        try:
+            cursor.execute(query, values)
+            db.commit()
+            logging.info(f"Admin added book: {title}")
+            return redirect(url_for('books'))
+        except Exception as e:
+            logging.error(f"Error adding book: {e}")
+            error_message = "Error adding book"
+
+    return render_template("add_book.html", error_message=error_message)
 
 @app.route('/admin/books/update/<int:book_id>', methods=['GET', 'POST'])
 def update_book(book_id):
-    pass
+    if 'admin_id' not in session:
+        logging.warning("Unauthorized admin book add attempt")
+        return redirect(url_for('admin_login'))
+    
+    cursor.execute("SELECT * FROM books WHERE id = %s", (book_id,))
+    book = cursor.fetchone()
+
+    if not book:
+        error_message = "Book not found"
+
+    if request.method == 'POST':
+        title = request.form.get('title')
+        author = request.form.get('author')
+        description = request.form.get('description')
+        published_year = request.form.get('published_year')
+        genre = request.form.get('genre')
+
+        update_query = """
+            UPDATE books SET
+            title = %s,
+            author = %s,
+            description = %s,
+            published_year = %s,
+            genre = %s
+            WHERE id = %s
+        """
+        values = (title, author, description, published_year, genre, book_id)
+
+        try:
+            cursor.execute(update_query, values)
+            db.commit()
+            logging.info(f"Book {book_id} updated by admin")
+            return redirect(url_for('books'))
+        except Exception as e:
+            logging.error(f"Error updating book {book_id}: {e}")
+            return render_template("update_book.html", book=book, error_message="Something went wrong")
+        
+    return render_template("update_book.html", book=book, error_message=error_message)
 
 @app.route('/admin/books/remove/<int:book_id>', methods=['GET', 'POST'])
-def remove_book():
-    pass
+def remove_book(book_id):
+    if 'admin_id' not in session:
+        logging.warning("Unauthorized admin book add attempt")
+        return redirect(url_for('admin_login'))
+    
+    try:
+        query = "DELETE FROM books WHERE id = %s"
+        cursor.execute(query, (book_id,))
+        db.commit()
+        logging.info(f"Book {book_id} removed by admin")
+        return redirect(url_for('books'))
+    except Exception as e:
+        logging.error(f"Error removing book {book_id}: {e}")
+        return "something went wrong"
 
 @app.route('/about_us')
 def about_us():
@@ -225,6 +366,16 @@ def about_us():
 @app.route('/faq')
 def faq():
     pass
+
+@app.before_request
+def update_last_seen():
+    now = datetime.now()
+    if 'user_id' in session:
+        cursor.execute("UPDATE users SET last_seen = %s WHERE id = %s", (now, session['user_id']))
+        db.commit()
+    elif 'admin_id' in session:
+        cursor.execute("UPDATE users SET last_seen = %s WHERE id = %s", (now, session['admin_id']))
+        db.commit()
 
 if __name__ == "__main__":
     app.run(debug=True)
