@@ -6,25 +6,31 @@
     <title>Home</title>
 </head>
 <body>
-    <h1>Home Page</h1>
+    <h1>Welcome to the Library</h1>
+
     <div>
-        <div>
-            {% if 'user' in session %}
-                <p>Welcome, {{ session['user'] }}</p>
-                <a href="{{ url_for('logout')}}">Logout</a>
-            {% else 'user' not in session %}
-                <a href="{{ url_for('login') }}">Login</a>
-                <a href="{{ url_for('register') }}">Register</a>
-            {% endif %}
-            <a href=""></a>
-            <a href=""></a>
-        </div>
+        {% if session.get('user_id') %}
+            <p>Welcome, {{ session['username'] }}!</p>
+            <a href="{{ url_for('user') }}">Your Dashboard</a><br>
+            <a href="{{ url_for('books') }}">Browse Books</a><br>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% elif session.get('admin_id') %}
+            <p>Welcome, Admin!</p>
+            <a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a><br>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        {% else %}
+            <a href="{{ url_for('login') }}">User Login</a><br>
+            <a href="{{ url_for('register') }}">Register</a><br>
+        {% endif %}
     </div>
 
+    <hr>
 
-
-
-
-
+    <div>
+        <a href="{{ url_for('about_us') }}">About Us</a><br>
+        <a href="{{ url_for('faq') }}">FAQ</a><br>
+        <a href="{{ url_for('books') }}">Books</a><br>
+        <a href="{{ url_for('search') }}">Search</a><br>
+    </div>
 </body>
 </html>

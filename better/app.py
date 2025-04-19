@@ -20,14 +20,13 @@ password_hash = hashlib.sha256()
 app.secret_key = 'something123'
 
 db = mysql.connector.connect(
-    host="",
-    user="",
-    password="",
-    database=""
+    host="127.0.0.1",
+    user="root",
+    database="library"
 )
 cursor = db.cursor(dictionary=True)
 
-@app.route('/')
+@app.route('/home')
 def home():
     return render_template('index.html')
 
@@ -361,11 +360,11 @@ def remove_book(book_id):
 
 @app.route('/about_us')
 def about_us():
-    pass
+    return render_template('about_us.html')
 
 @app.route('/faq')
 def faq():
-    pass
+    return render_template('faq.html')
 
 @app.before_request
 def update_last_seen():
