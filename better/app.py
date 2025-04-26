@@ -4,6 +4,7 @@ import hashlib
 import logging
 import os
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
 if os.path.exists('better/logs/report.log'):
     with open('better/logs/report.log', 'w') as file:
@@ -26,7 +27,7 @@ db = mysql.connector.connect(
 )
 cursor = db.cursor(dictionary=True)
 
-@app.route('/home')
+@app.route('/')
 def home():
     return render_template('index.html')
 
@@ -74,12 +75,12 @@ def register():
             db.commit()
             print("the register was succesfull")
             logging.info(f"User {username} with email: {email} Registered")
-            return redirect(url_for('home'))
+            return redirect(url_for('login'))
         except Exception as e:
             print("something went wrong when updating the database")
             logging.error(f"Error ocured with writing to database: {e}")
 
-    return render_template('login.html')
+    return render_template('register.html')
 
 @app.route('/logout')
 def logout():
@@ -197,7 +198,6 @@ def return_book(book_id):
     logging.info(f"User {user_id} returned book {book_id}")
     return redirect(url_for('borrow_history'))
     
-
 @app.route('/search')
 def search():
     query = request.args.get('query')
@@ -217,6 +217,7 @@ def search():
 
 @app.route('/login/admin', methods=['GET', 'POST'])
 def admin_login():
+    error_message = None
     if request.method == 'POST':
         admin_password = request.form.get('password')
         admin_email = request.form.get('email')
@@ -272,6 +273,8 @@ def admin_dashboard():
 
 @app.route('/admin/books/add', methods=['GET', 'POST'])
 def add_book():
+    error_message = None
+
     if 'admin_id' not in session:
         logging.warning("Unauthorized admin book add attempt")
         return redirect(url_for('admin_login'))
@@ -282,13 +285,19 @@ def add_book():
         description = request.form.get('description')
         published_year = request.form.get('published_year')
         genre = request.form.get('genre')
+        cover_image = request.files.get('cover_image')
+
+        filename = None
+        if cover_image and cover_image.filename != '':
+            filename = secure_filename(cover_image.filename)
+            cover_image.save(os.path.join('static', 'images', filename))
 
         query = """
-            INSERT INTO books (title, author, description, published_year, genre, is_available)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            INSERT INTO books (title, author, description, published_year, genre, is_available, cover_image)
+            VALUES (%s, %s, %s, %s, %s, %s, %s)
         """
 
-        values = (title, author, description, published_year, genre, True)
+        values = (title, author, description, published_year, genre, True, filename)
 
         try:
             cursor.execute(query, values)

@@ -13,5 +13,8 @@
         <li>Currently Borrowed Books: {{ borrowed_books }}</li>
         <li>Users Online (past 5 mins): {{ online_users }}</li>
     </ul>
+
+    <a href="{{ url_for('add_book') }}">Add_book</a>
+    <a href="{{ url_for('update_book') }}">Update_book</a>
 </body>
 </html>

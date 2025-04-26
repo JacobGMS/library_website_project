@@ -7,7 +7,7 @@
 </head>
 <body>
     <h1>Update Book</h1>
-    <form method="POST">
+    <form method="POST" enctype="multipart/form-data">
         <label>Title:</label>
         <input type="text" name="title" value="{{ book.title }}" required><br>
 
@@ -23,8 +23,17 @@
         <label>Genre:</label>
         <input type="text" name="genre" value="{{ book.genre }}"><br>
 
+        <label>Book Cover:</label>
+        <input type="file" name="cover_image" accept=".jpg, .jpeg, .png, .gif"><br>
+
         <button type="submit">Update Book</button>
     </form>
+
+    {% if book.cover_image %}
+    <p>Current cover:</p>
+    <img src="{{ url_for('static', filename='images/' + book.cover_image) }}" width="150">
+    {% endif %}
+
     {% if error_message %}
         <p style="color: red">{{ error_message }}</p>
     {% endif %}
