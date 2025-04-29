@@ -312,6 +312,7 @@ def add_book():
 
 @app.route('/admin/books/update/<int:book_id>', methods=['GET', 'POST'])
 def update_book(book_id):
+    book = None
     if 'admin_id' not in session:
         logging.warning("Unauthorized admin book add attempt")
         return redirect(url_for('admin_login'))

@@ -1,13 +1,45 @@
-2025-04-19 15:46:49,665 - WARNING -  * Debugger is active!
-2025-04-19 15:46:49,667 - INFO -  * Debugger PIN: 273-709-963
-2025-04-19 15:46:53,204 - INFO - 127.0.0.1 - - [19/Apr/2025 15:46:53] "GET /admin/books/add HTTP/1.1" 200 -
-2025-04-19 15:49:12,629 - INFO - Admin added book: Little Princ
-2025-04-19 15:49:12,630 - INFO - 127.0.0.1 - - [19/Apr/2025 15:49:12] "[32mPOST /admin/books/add HTTP/1.1[0m" 302 -
-2025-04-19 15:49:12,654 - INFO - 127.0.0.1 - - [19/Apr/2025 15:49:12] "GET /books HTTP/1.1" 200 -
-2025-04-19 15:49:15,091 - INFO - 127.0.0.1 - - [19/Apr/2025 15:49:15] "GET /books/1 HTTP/1.1" 200 -
-2025-04-19 15:54:08,612 - INFO - 127.0.0.1 - - [19/Apr/2025 15:54:08] "GET /books/1 HTTP/1.1" 200 -
-2025-04-19 15:54:15,694 - INFO - Book 1 removed by admin
-2025-04-19 15:54:15,694 - INFO - 127.0.0.1 - - [19/Apr/2025 15:54:15] "[32mPOST /admin/books/remove/1 HTTP/1.1[0m" 302 -
-2025-04-19 15:54:15,707 - INFO - 127.0.0.1 - - [19/Apr/2025 15:54:15] "GET /books HTTP/1.1" 200 -
-2025-04-19 15:54:23,723 - INFO - 127.0.0.1 - - [19/Apr/2025 15:54:23] "GET /login/admin HTTP/1.1" 200 -
-2025-04-19 15:54:27,175 - INFO - 127.0.0.1 - - [19/Apr/2025 15:54:27] "GET /admin HTTP/1.1" 200 -
+2025-04-28 13:15:41,902 - WARNING -  * Debugger is active!
+2025-04-28 13:15:41,908 - INFO -  * Debugger PIN: 226-320-164
+2025-04-28 13:15:59,320 - INFO - 127.0.0.1 - - [28/Apr/2025 13:15:59] "[35m[1mGET /admin HTTP/1.1[0m" 500 -
+2025-04-28 13:15:59,538 - INFO - 127.0.0.1 - - [28/Apr/2025 13:15:59] "[36mGET /admin?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-04-28 13:15:59,541 - INFO - 127.0.0.1 - - [28/Apr/2025 13:15:59] "GET /admin?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1" 200 -
+2025-04-28 13:15:59,581 - INFO - 127.0.0.1 - - [28/Apr/2025 13:15:59] "GET /admin?__debugger__=yes&cmd=resource&f=console.png&s=VbH3JOISQKFxCed9X9fl HTTP/1.1" 200 -
+2025-04-28 13:16:19,829 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:19] "GET /login/admin HTTP/1.1" 200 -
+2025-04-28 13:16:20,505 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:20] "GET / HTTP/1.1" 200 -
+2025-04-28 13:16:23,768 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:23] "GET /books HTTP/1.1" 200 -
+2025-04-28 13:16:28,424 - INFO - User Unknown logged out
+2025-04-28 13:16:28,426 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:28] "[32mGET /logout HTTP/1.1[0m" 302 -
+2025-04-28 13:16:28,442 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:28] "GET / HTTP/1.1" 200 -
+2025-04-28 13:16:32,101 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:32] "GET /about_us HTTP/1.1" 200 -
+2025-04-28 13:16:35,432 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:35] "GET /faq HTTP/1.1" 200 -
+2025-04-28 13:16:42,162 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:42] "[32mGET /search HTTP/1.1[0m" 302 -
+2025-04-28 13:16:42,199 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:42] "GET /books HTTP/1.1" 200 -
+2025-04-28 13:16:49,576 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:49] "[32mGET /search HTTP/1.1[0m" 302 -
+2025-04-28 13:16:49,609 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:49] "GET /books HTTP/1.1" 200 -
+2025-04-28 13:16:57,834 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:57] "[32mGET /search HTTP/1.1[0m" 302 -
+2025-04-28 13:16:57,855 - INFO - 127.0.0.1 - - [28/Apr/2025 13:16:57] "GET /books HTTP/1.1" 200 -
+2025-04-28 13:17:08,855 - INFO - 127.0.0.1 - - [28/Apr/2025 13:17:08] "GET /login HTTP/1.1" 200 -
+2025-04-28 13:17:11,586 - INFO - 127.0.0.1 - - [28/Apr/2025 13:17:11] "GET /register HTTP/1.1" 200 -
+2025-04-28 13:18:29,058 - INFO - 127.0.0.1 - - [28/Apr/2025 13:18:29] "GET /register HTTP/1.1" 200 -
+2025-04-28 13:18:34,856 - WARNING - Unauthorized access to /admin
+2025-04-28 13:18:34,857 - INFO - 127.0.0.1 - - [28/Apr/2025 13:18:34] "[32mGET /admin HTTP/1.1[0m" 302 -
+2025-04-28 13:18:34,897 - INFO - 127.0.0.1 - - [28/Apr/2025 13:18:34] "GET /login/admin HTTP/1.1" 200 -
+2025-04-28 13:22:15,190 - WARNING - Admin login failed: Admin_mail@example.com 	 not found or not an admin
+2025-04-28 13:22:15,191 - INFO - 127.0.0.1 - - [28/Apr/2025 13:22:15] "POST /login/admin HTTP/1.1" 200 -
+2025-04-28 13:22:28,159 - WARNING - Admin login failed: Admin_mail@example.com 	 not found or not an admin
+2025-04-28 13:22:28,160 - INFO - 127.0.0.1 - - [28/Apr/2025 13:22:28] "POST /login/admin HTTP/1.1" 200 -
+2025-04-28 13:22:39,349 - WARNING - Admin login failed: Admin_mail@example.com 	 not found or not an admin
+2025-04-28 13:22:39,350 - INFO - 127.0.0.1 - - [28/Apr/2025 13:22:39] "POST /login/admin HTTP/1.1" 200 -
+2025-04-28 13:22:59,650 - WARNING - Admin login failed: Admin_mail@example.com 	 not found or not an admin
+2025-04-28 13:22:59,651 - INFO - 127.0.0.1 - - [28/Apr/2025 13:22:59] "POST /login/admin HTTP/1.1" 200 -
+2025-04-28 13:23:09,982 - WARNING - Admin login failed: Admin_mail@example.com 	 not found or not an admin
+2025-04-28 13:23:09,983 - INFO - 127.0.0.1 - - [28/Apr/2025 13:23:09] "POST /login/admin HTTP/1.1" 200 -
+2025-04-28 13:23:23,833 - WARNING - Wrong admin password for Admin_mail@example.com
+2025-04-28 13:23:23,834 - INFO - 127.0.0.1 - - [28/Apr/2025 13:23:23] "POST /login/admin HTTP/1.1" 200 -
+2025-04-28 13:23:42,897 - INFO - Admin Admin_mail@example.com logged in successfully
+2025-04-28 13:23:42,898 - INFO - 127.0.0.1 - - [28/Apr/2025 13:23:42] "[32mPOST /login/admin HTTP/1.1[0m" 302 -
+2025-04-28 13:23:43,000 - INFO - 127.0.0.1 - - [28/Apr/2025 13:23:43] "[35m[1mGET /admin HTTP/1.1[0m" 500 -
+2025-04-28 13:23:43,097 - INFO - 127.0.0.1 - - [28/Apr/2025 13:23:43] "[36mGET /admin?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.1[0m" 304 -
+2025-04-28 13:23:43,100 - INFO - 127.0.0.1 - - [28/Apr/2025 13:23:43] "[36mGET /admin?__debugger__=yes&cmd=resource&f=style.css HTTP/1.1[0m" 304 -
+2025-04-28 13:23:43,131 - INFO - 127.0.0.1 - - [28/Apr/2025 13:23:43] "[36mGET /admin?__debugger__=yes&cmd=resource&f=console.png&s=VbH3JOISQKFxCed9X9fl HTTP/1.1[0m" 304 -
+2025-04-28 13:26:16,398 - INFO - 127.0.0.1 - - [28/Apr/2025 13:26:16] "GET /admin HTTP/1.1" 200 -
