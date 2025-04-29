@@ -329,6 +329,12 @@ def update_book(book_id):
         description = request.form.get('description')
         published_year = request.form.get('published_year')
         genre = request.form.get('genre')
+        new_image = book['cover_image']
+
+        if new_image and new_image.filename != '':
+            filename = secure_filename(new_image.filename)
+            new_image.save(os.path.join('static', 'images', filename))
+
 
         update_query = """
             UPDATE books SET
@@ -336,16 +342,17 @@ def update_book(book_id):
             author = %s,
             description = %s,
             published_year = %s,
-            genre = %s
+            genre = %s,
+            cover_image = %s
             WHERE id = %s
         """
-        values = (title, author, description, published_year, genre, book_id)
+        values = (title, author, description, published_year, genre, filename, book_id)
 
         try:
             cursor.execute(update_query, values)
             db.commit()
             logging.info(f"Book {book_id} updated by admin")
-            return redirect(url_for('books'))
+            return redirect(url_for('book_details', book_id=book_id))
         except Exception as e:
             logging.error(f"Error updating book {book_id}: {e}")
             return render_template("update_book.html", book=book, error_message="Something went wrong")
