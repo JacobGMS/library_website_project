@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, request, redirect, session
+from flask import Flask, render_template, url_for, request, redirect, session, send_from_directory
 import mysql.connector
 import sqlite3
 import hashlib
@@ -163,22 +163,16 @@ def borrow_book(book_id):
    
    user_id = session['user_id']
 
-   check_query = """
-    SELECT * FROM borrowed_books
-    WHERE user_id = ? AND book_id = ? AND returned_at IS NULL
-    """
-   cursor.execute(check_query, (user_id, book_id))
-   already_borrowed = cursor.fetchone()
-   
-   if already_borrowed:
-       logging.warning(f"User {user_id} tried to borrow book {book_id} again.")
-       return "You already borrowed this book"
-   
-   query = "INSERT INTO borrowed_books (user_id, book_id) VALUES (?, ?)"
-   cursor.execute(query, (user_id, book_id))
+
+   cursor.execute("SELECT * FROM books WHERE id = ?")
+   book = cursor.fetchone()
+   if not book or not book['pdf_file']:
+       logging.warning(f"book id: {book_id} PDF is missing")
+       return "book not found or missing PDF"
+ 
+   cursor.execute("INSERT INTO borrowed_books (user_id, book_id) VALUES (?, ?)", (user_id, book_id))
    db.commit()
-   logging.info(f"User {user_id} borrowed book {book_id}")
-   return redirect(url_for('borrow_history'))
+   return send_from_directory('static/pdfs', book['pdf_file'], as_attachment=True)
 
 @app.route('/books/return/<int:book_id>', methods=['POST'])
 def return_book(book_id):
@@ -256,21 +250,21 @@ def admin_dashboard():
     cursor.execute("SELECT COUNT(*) AS total_books FROM books")
     total_books = cursor.fetchone()['total_books']
 
-    cursor.execute("SELECT COUNT(*) AS borrowed_books FROM borrowed_books WHERE returned_at IS NULL")
-    borrowed_books = cursor.fetchone()['borrowed_books']
+    cursor.execute("SELECT COUNT(*) AS total_borrows FROM borrowed_books")
+    borrow_stats = cursor.fetchone()['total_borrows']
 
     cursor.execute("""
         SELECT COUNT(*) AS online_users 
         FROM users 
-        WHERE last_seen >= NOW() - INTERVAL 5 MINUTE
+        WHERE last_seen >= datetime('now', '-5 minutes')
     """)
     online_users = cursor.fetchone()['online_users']
 
     return render_template("admin_dashboard.html",
                            total_users=total_users,
                            total_books=total_books,
-                           borrowed_books=borrowed_books,
-                           online_users=online_users)
+                           online_users=online_users,
+                           borrow_stats=borrow_stats)
 
 @app.route('/admin/books/add', methods=['GET', 'POST'])
 def add_book():
@@ -330,12 +324,13 @@ def update_book(book_id):
         description = request.form.get('description')
         published_year = request.form.get('published_year')
         genre = request.form.get('genre')
-        new_image = book['cover_image']
+        new_image = request.files.get('cover_image')
 
         if new_image and new_image.filename != '':
             filename = secure_filename(new_image.filename)
             new_image.save(os.path.join('static', 'images', filename))
-
+        else:
+            filename = book['cover_image']
 
         update_query = """
             UPDATE books SET
