@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for, request, redirect, session
 import mysql.connector
+import sqlite3
 import hashlib
 import logging
 import os
@@ -15,17 +16,17 @@ logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
 )
+def get_db():
+    db = sqlite3.connect('better/library.db')
+    db.row_factory = sqlite3.Row
+    return db
 
 app = Flask(__name__)
 password_hash = hashlib.sha256()
 app.secret_key = 'something123'
 
-db = mysql.connector.connect(
-    host="127.0.0.1",
-    user="root",
-    database="library"
-)
-cursor = db.cursor(dictionary=True)
+db = get_db()
+cursor = db.cursor()
 
 @app.route('/')
 def home():
@@ -38,7 +39,7 @@ def login():
         identifier = request.form.get('identifier')
         password = request.form.get('password')
 
-        query = "SELECT * FROM users WHERE email = %s OR username = %s"
+        query = "SELECT * FROM users WHERE email = ? OR username = ?"
         cursor.execute(query, (identifier, identifier))
         user = cursor.fetchone()
 
@@ -68,7 +69,7 @@ def register():
 
         password_hash = hashlib.sha256(password.encode()).hexdigest()
 
-        query = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
+        query = "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"
         value = (username, email, password_hash)
         try:
             cursor.execute(query, value)
@@ -110,7 +111,7 @@ def favorite():
         SELECT b.id, b.title
         FROM favorites f
         JOIN books b ON f.book_id = b.id
-        WHERE f.user_id = %s
+        WHERE f.user_id = ?
     """
 
     cursor.execute(query, (user_id,))
@@ -129,7 +130,7 @@ def borrow_history():
         SELECT b.title, bb.borrowed_at, bb.returned_at
         FROM borrowed_books bb
         JOIN books b ON bb.book_id = b.id
-        WHERE bb.user_id = %s
+        WHERE bb.user_id = ?
     """
     cursor.execute(query, (user_id,))
     history = cursor.fetchall()
@@ -144,7 +145,7 @@ def books():
 
 @app.route('/books/<int:book_id>')
 def book_details(book_id):
-    query = "SELECT * FROM books WHERE id = %s"
+    query = "SELECT * FROM books WHERE id = ?"
     cursor.execute(query, (book_id,))
     book = cursor.fetchone()
 
@@ -164,7 +165,7 @@ def borrow_book(book_id):
 
    check_query = """
     SELECT * FROM borrowed_books
-    WHERE user_id = %s AND book_id = %s AND returned_at IS NULL
+    WHERE user_id = ? AND book_id = ? AND returned_at IS NULL
     """
    cursor.execute(check_query, (user_id, book_id))
    already_borrowed = cursor.fetchone()
@@ -173,7 +174,7 @@ def borrow_book(book_id):
        logging.warning(f"User {user_id} tried to borrow book {book_id} again.")
        return "You already borrowed this book"
    
-   query = "INSERT INTO borrowed_books (user_id, book_id) VALUES (%s, %s)"
+   query = "INSERT INTO borrowed_books (user_id, book_id) VALUES (?, ?)"
    cursor.execute(query, (user_id, book_id))
    db.commit()
    logging.info(f"User {user_id} borrowed book {book_id}")
@@ -189,8 +190,8 @@ def return_book(book_id):
 
     query = """
         UPDATE borrowed_books
-        SET returned_at = %s
-        WHERE user_id = %s AND book_id = %s AND returned_at IS NULL
+        SET returned_at = ?
+        WHERE user_id = ? AND book_id = ? AND returned_at IS NULL
     """
     now = datetime.now()
     cursor.execute(query, (now, user_id, book_id))
@@ -208,7 +209,7 @@ def search():
     like_pattern = f"%{query}%"
     sql = """
         SELECT * FROM books
-        WHERE title LIKE %s OR author LIKE %s
+        WHERE title LIKE ? OR author LIKE ?
     """
     cursor.execute(sql, (like_pattern, like_pattern))
     results = cursor.fetchall()
@@ -222,7 +223,7 @@ def admin_login():
         admin_password = request.form.get('password')
         admin_email = request.form.get('email')
 
-        query = "SELECT * FROM users WHERE email = %s AND is_admin = TRUE"
+        query = "SELECT * FROM users WHERE email = ? AND is_admin = TRUE"
         cursor.execute(query, (admin_email,))
         admin_user = cursor.fetchone()
 
@@ -294,7 +295,7 @@ def add_book():
 
         query = """
             INSERT INTO books (title, author, description, published_year, genre, is_available, cover_image)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
         """
 
         values = (title, author, description, published_year, genre, True, filename)
@@ -317,7 +318,7 @@ def update_book(book_id):
         logging.warning("Unauthorized admin book add attempt")
         return redirect(url_for('admin_login'))
     
-    cursor.execute("SELECT * FROM books WHERE id = %s", (book_id,))
+    cursor.execute("SELECT * FROM books WHERE id = ?", (book_id,))
     book = cursor.fetchone()
 
     if not book:
@@ -338,13 +339,13 @@ def update_book(book_id):
 
         update_query = """
             UPDATE books SET
-            title = %s,
-            author = %s,
-            description = %s,
-            published_year = %s,
-            genre = %s,
-            cover_image = %s
-            WHERE id = %s
+            title = ?,
+            author = ?,
+            description = ?,
+            published_year = ?,
+            genre = ?,
+            cover_image = ?
+            WHERE id = ?
         """
         values = (title, author, description, published_year, genre, filename, book_id)
 
@@ -366,7 +367,7 @@ def remove_book(book_id):
         return redirect(url_for('admin_login'))
     
     try:
-        query = "DELETE FROM books WHERE id = %s"
+        query = "DELETE FROM books WHERE id = ?"
         cursor.execute(query, (book_id,))
         db.commit()
         logging.info(f"Book {book_id} removed by admin")
@@ -387,10 +388,10 @@ def faq():
 def update_last_seen():
     now = datetime.now()
     if 'user_id' in session:
-        cursor.execute("UPDATE users SET last_seen = %s WHERE id = %s", (now, session['user_id']))
+        cursor.execute("UPDATE users SET last_seen = ? WHERE id = ?", (now, session['user_id']))
         db.commit()
     elif 'admin_id' in session:
-        cursor.execute("UPDATE users SET last_seen = %s WHERE id = %s", (now, session['admin_id']))
+        cursor.execute("UPDATE users SET last_seen = ? WHERE id = ?", (now, session['admin_id']))
         db.commit()
 
 if __name__ == "__main__":
