@@ -1,5 +1,4 @@
 from flask import Flask, render_template, url_for, request, redirect, session, send_from_directory
-import mysql.connector
 import sqlite3
 import hashlib
 import logging
